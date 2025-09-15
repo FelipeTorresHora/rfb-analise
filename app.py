@@ -43,7 +43,7 @@ def carregar_dados():
         st.error("Nenhum arquivo 'rfb_*.csv' encontrado.")
         return pd.DataFrame()
     
-    lista_de_dfs = [pd.read_csv(f, sep=';', usecols=['cnpj_basico', 'situacao_cadastral', 'data_situacao_cadastral', 'cnae_fiscal_principal', 'municipio'], dtype=str) for f in arquivos_csv]
+    lista_de_dfs = [pd.read_csv(f, sep=';', usecols=['cnpj_basico', 'situacao_cadastral', 'data_situacao_cadastral', 'cnae_fiscal_principal', 'municipio','razao_social'], dtype=str) for f in arquivos_csv]
     df = pd.concat(lista_de_dfs, ignore_index=True)
     
     # 3. Limpeza e conversão de tipos do DataFrame principal
