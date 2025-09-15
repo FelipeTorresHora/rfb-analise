@@ -51,8 +51,7 @@ def carregar_dados():
     df['data_situacao_cadastral'] = pd.to_datetime(df['data_situacao_cadastral'], format='%Y%m%d', errors='coerce')
     df.dropna(subset=['data_situacao_cadastral', 'situacao_cadastral'], inplace=True)
     df['municipio'] = df['municipio'].astype(str)
-    df['cnae_fiscal_principal'] = df['cnae_fiscal_principal'].astype(str)
-
+    df['cnae_fiscal_principal'] = df['cnae_fiscal_principal'].str.strip()
     # 4 Juntar a descrição do CNAE ao DataFrame principal
     df = pd.merge(df, df_cnae, left_on='cnae_fiscal_principal', right_on='cnae', how='left')
     df['descricao'].fillna('Descrição não informada', inplace=True) # Preenche CNAEs sem correspondência
@@ -133,7 +132,9 @@ df_filtrado = df_completo.copy()
 if st.session_state.municipio_selecionado:
     df_filtrado = df_filtrado[df_filtrado['municipio'].isin(st.session_state.municipio_selecionado)]
 if st.session_state.cnae_selecionado:
-    df_filtrado = df_filtrado[df_filtrado['cnae_fiscal_principal'].isin(st.session_state.cnae_selecionado)]
+    # Extrai apenas o código CNAE da seleção para o filtro
+    codigos_cnae_selecionados = [item.split(' - ')[0] for item in st.session_state.cnae_selecionado]
+    df_filtrado = df_filtrado[df_filtrado['cnae_fiscal_principal'].isin(codigos_cnae_selecionados)]
 if st.session_state.situacao_selecionada:
     df_filtrado = df_filtrado[df_filtrado['situacao_cadastral_label'].isin(st.session_state.situacao_selecionada)]
 if len(st.session_state.periodo_selecionado) == 2:
