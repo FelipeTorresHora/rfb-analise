@@ -57,7 +57,7 @@ def carregar_dados():
     # 4. ENRIQUECIMENTO: Juntar a descrição do CNAE ao DataFrame principal
     # Usamos um 'left' merge para manter todas as empresas, mesmo que um CNAE não seja encontrado
     df = pd.merge(df, df_cnae, left_on='cnae_fiscal_principal', right_on='cnae', how='left')
-    df['descricao'].fillna('Descrição não informada', inplace=True) # Preenche CNAEs sem correspondência
+    df['descricao'] = df['descricao'].fillna('Descrição não informada')
     
     # 5. Criar colunas otimizadas para filtros e visualizações
     df['ano_situacao'] = df['data_situacao_cadastral'].dt.year
