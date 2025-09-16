@@ -1,3 +1,6 @@
 venv/
 teste.py
 dados/cnpjs_com_municipios_com_razao.csv
+dados/rfb_1.csv
+dados/rfb_2.csv
+dados/rfb_3.csv
