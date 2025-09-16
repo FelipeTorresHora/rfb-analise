@@ -27,7 +27,8 @@ def carregar_dados():
     """
     # 1. Carregar e tratar a tabela de descrições de CNAE
     try:
-        df_cnae = pd.read_csv('dados/codigos_cnae_2.csv', sep=';', dtype=str, encoding='utf-8-sig')
+        # O encoding 'utf-8-sig' remove o BOM (caractere invisível) do início do arquivo
+        df_cnae = pd.read_csv('codigos_cnae_2.csv', sep=';', dtype=str, encoding='utf-8-sig')
         df_cnae.columns = ['cnae', 'descricao']
         df_cnae.dropna(how='all', inplace=True)
         # O arquivo CNAE possui duplicatas, removemos mantendo a primeira ocorrência
@@ -38,12 +39,12 @@ def carregar_dados():
         return pd.DataFrame() # Retorna um DataFrame vazio para evitar que o app quebre
 
     # 2. Carregar os dados principais da RFB
-    arquivos_csv = glob.glob('dados/rfb_*.csv')
+    arquivos_csv = glob.glob('rfb_*.csv')
     if not arquivos_csv:
         st.error("Nenhum arquivo 'rfb_*.csv' encontrado.")
         return pd.DataFrame()
     
-    lista_de_dfs = [pd.read_csv(f, sep=',', usecols=['cnpj_basico', 'situacao_cadastral', 'data_situacao_cadastral', 'cnae_fiscal_principal', 'municipio','razao_social'], dtype=str) for f in arquivos_csv]
+    lista_de_dfs = [pd.read_csv(f, sep=';', usecols=['cnpj_basico', 'situacao_cadastral', 'data_situacao_cadastral', 'cnae_fiscal_principal', 'municipio'], dtype=str) for f in arquivos_csv]
     df = pd.concat(lista_de_dfs, ignore_index=True)
     
     # 3. Limpeza e conversão de tipos do DataFrame principal
@@ -51,8 +52,10 @@ def carregar_dados():
     df['data_situacao_cadastral'] = pd.to_datetime(df['data_situacao_cadastral'], format='%Y%m%d', errors='coerce')
     df.dropna(subset=['data_situacao_cadastral', 'situacao_cadastral'], inplace=True)
     df['municipio'] = df['municipio'].astype(str)
-    df['cnae_fiscal_principal'] = df['cnae_fiscal_principal'].str.strip()
-    # 4 Juntar a descrição do CNAE ao DataFrame principal
+    df['cnae_fiscal_principal'] = df['cnae_fiscal_principal'].astype(str)
+
+    # 4. ENRIQUECIMENTO: Juntar a descrição do CNAE ao DataFrame principal
+    # Usamos um 'left' merge para manter todas as empresas, mesmo que um CNAE não seja encontrado
     df = pd.merge(df, df_cnae, left_on='cnae_fiscal_principal', right_on='cnae', how='left')
     df['descricao'].fillna('Descrição não informada', inplace=True) # Preenche CNAEs sem correspondência
     
@@ -60,6 +63,7 @@ def carregar_dados():
     df['ano_situacao'] = df['data_situacao_cadastral'].dt.year
     df['mes_ano_situacao'] = df['data_situacao_cadastral'].dt.to_period('M')
     df['situacao_cadastral_label'] = df['situacao_cadastral'].map(MAPEAMENTO_SITUACAO).fillna('Outra')
+    # **NOVA COLUNA PARA EXIBIÇÃO**
     df['cnae_descricao'] = df['cnae_fiscal_principal'] + ' - ' + df['descricao']
     
     return df
@@ -101,8 +105,8 @@ st.session_state.municipio_selecionado = st.sidebar.multiselect(
 # Filtro por CNAE
 lista_cnaes = sorted(df_completo['cnae_descricao'].unique())
 st.session_state.cnae_selecionado = st.sidebar.multiselect(
-    "Selecione o CNAE Principal", 
-    options=lista_cnaes, 
+    "Selecione o CNAE Principal",
+    options=lista_cnaes,
     default=st.session_state.get('cnae_selecionado', [])
 )
 

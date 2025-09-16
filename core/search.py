@@ -28,8 +28,6 @@ def normalizar_texto(texto: Any) -> str:
     texto = str(texto)
     # Decompõe caracteres acentuados (ex: 'á' -> 'a' + ´)
     texto = unicodedata.normalize('NFD', texto)
-    # Remove os acentos (caracteres da categoria 'Mn')
-    texto = ''.join(c for c in texto if unicodedata.category(c) != 'Mn')
     
     return texto.lower().strip()
 
@@ -43,8 +41,8 @@ def extrair_palavras_chave(empresa_data: pd.Series) -> Set[str]:
     
     # Colunas que contêm informações valiosas para identificar a empresa
     campos_texto = [
-        'razao_social', 'nome_fantasia', 'logradouro', 'complemento', 'cnpj_basico',
-        'bairro', 'correio_eletronico', 'telefone1', 'cep_limpo', 'municipio_nome'
+        'cnpj_basico','situacao_cadastral','data_situacao_cadastral',
+        'cnae_fiscal_principal','municipio','razao_social'
     ]
     
     for campo in campos_texto:
@@ -58,7 +56,7 @@ def extrair_palavras_chave(empresa_data: pd.Series) -> Set[str]:
     
     # Remove palavras genéricas que não ajudam na identificação
     palavras_comuns = {
-        'ltda', 'cia', 'comercial', 'industria', 'servicos', 'eireli', 'me', 'sa',
+        'ltda', 'cia', 'comercial', 'servicos', 'me', 'sa',
         'empresa', 'rua', 'avenida', 'centro', 'bairro', 'com', 'br', 'gov'
     }
     
