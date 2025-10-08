@@ -1,6 +1,10 @@
 venv/
 teste.py
+teste.txt
 dados/cnpjs_com_municipios_com_razao.csv
 dados/rfb_1.csv
 dados/rfb_2.csv
 dados/rfb_3.csv
+dados/rfb_4.csv
+.streamlit/
+core/__pycache__/
