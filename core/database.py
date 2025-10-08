@@ -50,7 +50,7 @@ def carregar_mapeamento_municipios() -> Dict[str, Dict[str, str]]:
         dict: {'codigo_para_nome': {}, 'nome_para_codigo': {}}
     """
     try:
-        df = pd.read_csv('municipios.csv', sep=';', header=None, 
+        df = pd.read_csv('dados/municipios.csv', sep=';', header=None, 
                         names=['codigo', 'nome'], dtype={'codigo': str})
         
         # Remove zeros à esquerda dos códigos para compatibilidade
